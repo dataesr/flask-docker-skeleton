@@ -1,7 +1,7 @@
 import sys
 
 from mycode import ff 
-from application.server.main.logger import get_logger
+from project.server.main.logger import get_logger
 
 logger = get_logger(__name__)
 

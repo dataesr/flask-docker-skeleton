@@ -4,7 +4,7 @@ import redis
 
 from flask import Blueprint, current_app, jsonify, render_template, request
 from rq import Connection, Queue
-from application.server.main.tasks import create_task_patstat
+from project.server.main.tasks import create_task
 
 default_timeout = 4320000
 
@@ -31,7 +31,7 @@ def run_task_harvest():
 @main_blueprint.route('/tasks/<task_id>', methods=['GET'])
 def get_status(task_id):
     with Connection(redis.from_url(current_app.config['REDIS_URL'])):
-        q = Queue('pdf-harvester')
+        q = Queue('xxx-app-queue')
         task = q.fetch_job(task_id)
     if task:
         response_object = {
