@@ -20,7 +20,7 @@ def create_app():
     # set up extensions
     bootstrap.init_app(app)
     # register blueprints
-    from application.server.main.views import main_blueprint
+    from project.server.main.views import main_blueprint
     app.register_blueprint(main_blueprint)
     # shell context for flask cli
     app.shell_context_processor({'app': app})
