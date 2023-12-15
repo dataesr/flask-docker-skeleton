@@ -4,7 +4,7 @@ import redis
 
 from flask import Blueprint, current_app, jsonify, render_template, request
 from rq import Connection, Queue
-from project.server.main.tasks import create_task
+from project.server.main.tasks import create_task_compute
 
 default_timeout = 4320000
 
@@ -15,23 +15,20 @@ def home():
     return render_template('home.html')
 
 
-@main_blueprint.route('/harvest', methods=['POST'])
-def run_task_harvest():
-    """
-    Harvest data from unpaywall
-    """
+@main_blueprint.route('/compute', methods=['POST'])
+def run_task_compute():
     args = request.get_json(force=True)
     
     with Connection(redis.from_url(current_app.config['REDIS_URL'])):
-        q = Queue(name='xxx-app-queue', default_timeout=default_timeout)
-        task = q.enqueue(create_task_patstat, args)
+        q = Queue(name='sandbox', default_timeout=default_timeout)
+        task = q.enqueue(create_task_compute, args)
     response_object = {'status': 'success', 'data': {'task_id': task.get_id()}}
     return jsonify(response_object), 202
 
 @main_blueprint.route('/tasks/<task_id>', methods=['GET'])
 def get_status(task_id):
     with Connection(redis.from_url(current_app.config['REDIS_URL'])):
-        q = Queue('xxx-app-queue')
+        q = Queue('sandbox')
         task = q.fetch_job(task_id)
     if task:
         response_object = {
