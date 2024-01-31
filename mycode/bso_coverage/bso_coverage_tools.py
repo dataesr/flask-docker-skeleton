@@ -15,9 +15,7 @@ url_upw = "http://135.125.83.210"
 ALEX_DOI_PREFIX = "https://doi.org/"
 DATE_MIN = 2013
 DATE_MAX = 2021
-ES_HOST = "https://cluster.elasticsearch.dataesr.ovh"
-ES_INDEX = "bso-publications"
-
+ES_URL = os.getenv("ES_URL")
 ES_TOKEN = os.getenv("ES_TOKEN")
 OVH_OS_KEY = os.getenv("OVH_OS_KEY")
 OVH_OS_PROJECT_ID = os.getenv("OVH_OS_PROJECT_ID")
@@ -331,8 +329,8 @@ def analyse_work(
     result = {}
 
     # Get data from FOSM
-    fosm_doi_url = f"{ES_HOST}/{ES_INDEX}/_search?q=doi.keyword:%22{doi}%22"
-    fosm_response = requests.get(fosm_doi_url, headers={"Authorization": f"Basic {ES_TOKEN}"}).json()
+    fosm_doi_url = f"{ES_URL}?q=doi.keyword:%22{doi}%22"
+    fosm_response = requests.get(fosm_doi_url, headers={"Authorization": f"{ES_TOKEN}"}).json()
     fosm_hits_n = fosm_response.get("hits").get("total").get("value")
 
     # Several DOI found in FOSM - should not happen
