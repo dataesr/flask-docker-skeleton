@@ -36,9 +36,20 @@ def run_task_compute():
 @main_blueprint.route("/check_cordis", methods=["POST"])
 def run_task_check_cordus():
     args = request.get_json(force=True)
-    with Connection(redis.from_url(current_app.config["REDIS_URL"])):
-        q = Queue(name="sandbox", default_timeout=default_timeout)
-        task = q.enqueue(check_cordis, args)
+    projects_ids =args.get('projects')
+    assert(isinstance(projects_ids, list))
+    suffixes = {}
+    for p in projects_ids:
+        if isinstance(p, str) and len(p)>0:
+            suffix = p[-2:]
+            if suffix not in suffixes:
+                suffixes[suffix]=[]
+            suffixes[suffix].append(p)
+    for suffix in suffixes:
+        current_args = {"projects": suffixes[suffix], "suffix": suffix}
+        with Connection(redis.from_url(current_app.config["REDIS_URL"])):
+            q = Queue(name="sandbox", default_timeout=default_timeout)
+            task = q.enqueue(check_cordis, current_args)
     response_object = {"status": "success", "data": {"task_id": task.get_id()}}
     return jsonify(response_object), 202
 
