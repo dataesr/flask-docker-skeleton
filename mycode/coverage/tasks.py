@@ -1,9 +1,9 @@
 import duckdb
-import bso_coverage_tools as bct
+import mycode.coverage.tools as ct
 import os
 
 
-def test_mother_duck():
+def test_mother_duck(args):
     error = "NOT CONNECTED"
     with duckdb.connect(f"md:?motherduck_token={os.getenv('MD_TOKEN')}") as con:
         error = "CONNECTED"
@@ -14,7 +14,7 @@ def test_mother_duck():
 
 
 def bso_apply_coverage(row):
-    res = bct.analyse_from_openalex_work(row)
+    res = ct.analyse_from_openalex_work(row)
     print(res)
     return res
 

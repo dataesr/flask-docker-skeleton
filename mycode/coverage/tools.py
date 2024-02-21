@@ -1,25 +1,26 @@
-from dotenv import load_dotenv
 import hashlib
-import json
 import os
 import requests
 import subprocess
 from enum import Enum
 import pandas as pd
 import swiftclient
-from pprint import pprint
 
-load_dotenv()
-
-url_upw = "http://135.125.83.210"
 ALEX_DOI_PREFIX = "https://doi.org/"
 DATE_MIN = 2013
 DATE_MAX = 2021
 ES_URL = os.getenv("ES_URL")
 ES_TOKEN = os.getenv("ES_TOKEN")
-OVH_OS_KEY = os.getenv("OVH_OS_KEY")
-OVH_OS_PROJECT_ID = os.getenv("OVH_OS_PROJECT_ID")
-OVH_OS_USER = os.getenv("OVH_OS_USER")
+OS_AUTH_VERSION = os.getenv("AUTH_VERSION")
+OS_DOMAIN_NAME = os.getenv("OS_USER_DOMAIN_NAME")
+OS_PROJECT_DOMAIN_NAME = os.getenv("OS_PROJECT_DOMAIN_NAME")
+OS_PROJECT_NAME = os.getenv("OS_PROJECT_NAME")
+OS_PROJECT_ID = os.getenv("OS_PROJECT_ID")
+OS_REGION_NAME = os.getenv("OS_REGION_NAME")
+OS_AUTH_URL = os.getenv("OS_AUTH_URL")
+OS_KEY = os.getenv("OS_PASSWORD")
+OS_USER = os.getenv("OS_TENANT_NAME")
+OS_URL = os.getenv("OS_AUTH_URL")
 
 STATES = {
     "UNDEFINED": "Publication is undefined",
@@ -100,31 +101,31 @@ def error_str(error: Error) -> str:
 
 
 def cli_process(filename, container):
-    init_swift_cmd = f"swift -q --os-auth-url https://auth.cloud.ovh.net/v3 --auth-version 3 --key {OVH_OS_KEY} --user {OVH_OS_USER} --os-user-domain-name Default --os-project-domain-name Default --os-project-id {OVH_OS_PROJECT_ID} --os-project-name Alvitur --os-region-name GRA"
+    init_swift_cmd = f"swift -q --os-auth-url {OS_URL} --auth-version 3 --key {OS_KEY} --user {OS_USER} --os-user-domain-name Default --os-project-domain-name Default --os-project-id {OS_PROJECT_ID} --os-project-name Alvitur --os-region-name GRA"
     cmd_count = f"{init_swift_cmd} list {container} -p {filename} | wc -l"
     count = subprocess.check_output(cmd_count, shell=True)
     return int(count) == 1
 
 
 def cli_download(obj, container):
-    init_swift_cmd = f"swift -q --os-auth-url https://auth.cloud.ovh.net/v3 --auth-version 3 --key {OVH_OS_KEY} --user {OVH_OS_USER} --os-user-domain-name Default --os-project-domain-name Default --os-project-id {OVH_OS_PROJECT_ID} --os-project-name Alvitur --os-region-name GRA"
+    init_swift_cmd = f"swift -q --os-auth-url {OS_URL} --auth-version 3 --key {OS_KEY} --user {OS_USER} --os-user-domain-name Default --os-project-domain-name Default --os-project-id {OS_PROJECT_ID} --os-project-name Alvitur --os-region-name GRA"
     cmd_count = f"{init_swift_cmd} download {container} {obj}"
     subprocess.check_output(cmd_count, shell=True)
 
 
 def swift_connection():
     return swiftclient.Connection(
-        authurl="https://auth.cloud.ovh.net/v3",
-        user=OVH_OS_USER,
-        key=OVH_OS_KEY,
+        authurl=OS_URL,
+        user=OS_USER,
+        key=OS_KEY,
         os_options={
-            "user_domain_name": "Default",
-            "project_domain_name": "Default",
-            "project_id": OVH_OS_PROJECT_ID,
-            "project_name": "Alvitur",
-            "region_name": "GRA",
+            "user_domain_name": OS_DOMAIN_NAME,
+            "project_domain_name": OS_PROJECT_DOMAIN_NAME,
+            "project_id": OS_PROJECT_ID,
+            "project_name": OS_PROJECT_NAME,
+            "region_name": OS_REGION_NAME,
         },
-        auth_version="3",
+        auth_version=OS_AUTH_VERSION,
     )
 
 
