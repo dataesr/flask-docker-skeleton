@@ -5,7 +5,7 @@ import redis
 from flask import Blueprint, current_app, jsonify, render_template, request
 from rq import Connection, Queue
 from project.server.main.tasks import create_task_compute
-from mycode.cordis import check_cordis
+from mycode.cordis import check_cordis, gather_cordis
 from mycode.coverage.tasks import test_mother_duck
 from project.server.main.logger import get_logger
 
@@ -58,11 +58,17 @@ def run_task_check_cordus():
             if suffix not in suffixes:
                 suffixes[suffix]=[]
             suffixes[suffix].append(p)
+    extract_tasks = []
     for suffix in suffixes:
-        current_args = {"projects": suffixes[suffix], "suffix": suffix}
+        current_args = {"projects": suffixes[suffix], "suffix": suffix, "output_file": args.get('output_file')}
         with Connection(redis.from_url(current_app.config["REDIS_URL"])):
             q = Queue(name="sandbox", default_timeout=default_timeout)
             task = q.enqueue(check_cordis, current_args)
+            extract_tasks.append(task)
+        
+    with Connection(redis.from_url(current_app.config["REDIS_URL"])):
+        q = Queue(name="sandbox", default_timeout=default_timeout)
+        task = q.enqueue(gather_cordis, args, depends_on=extract_tasks)
     response_object = {"status": "success", "data": {"task_id": task.get_id()}}
     return jsonify(response_object), 202
 
